@@ -1,0 +1,101 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+
+const app = express();
+const port = 3000;
+
+app.use(bodyParser.json());
+
+// Dummy data
+const products = [
+  { id: 1, name: 'Product A', category: 'mens', price: 19.99, quantity: 50 },
+  { id: 2, name: 'Product B', category: 'womens', price: 29.99, quantity: 30 },
+  { id: 3, name: 'Product C', category: 'kids', price: 24.99, quantity: 20 },
+  // Add more dummy data as needed
+];
+
+const users = [
+  { id: 1, username: 'user1', email: 'user1@example.com', password: 'password1' },
+  { id: 2, username: 'user2', email: 'user2@example.com', password: 'password2' },
+  // Add more dummy data as needed
+];
+
+const carts = [
+  { userId: 1, products: [{ productId: 1, quantity: 2 }] },
+  { userId: 2, products: [{ productId: 2, quantity: 1 }] },
+  // Add more dummy data as needed
+];
+
+const orders = [
+  { id: 1, userId: 1, products: [{ productId: 1, quantity: 2 }] },
+  { id: 2, userId: 2, products: [{ productId: 2, quantity: 1 }] },
+  // Add more dummy data as needed
+];
+
+// Express.js Endpoints
+
+// Get all products
+app.get('/api/products', (req, res) => {
+  res.json(products);
+});
+
+// Get products by category
+app.get('/api/products/:category', (req, res) => {
+  const category = req.params.category.toLowerCase();
+  const filteredProducts = products.filter(product => product.category === category);
+  res.json(filteredProducts);
+});
+
+// User login
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+  // Implement actual login logic here (compare with stored user data)
+  res.send(`Welcome, ${username}!`);
+});
+
+// Get user cart
+app.get('/api/cart/:userId', (req, res) => {
+  const userId = parseInt(req.params.userId);
+  const userCart = carts.find(cart => cart.userId === userId);
+  res.json(userCart || {});
+});
+
+// Add product to cart
+app.post('/api/cart/add', (req, res) => {
+  const { userId, productId, quantity } = req.body;
+  // Implement logic to add product to the user's cart
+  res.send('Product added to cart');
+});
+
+// Place an order
+app.post('/api/orders', (req, res) => {
+  const { userId, products: orderProducts } = req.body;
+  // Implement logic to place an order
+  const newOrder = { id: orders.length + 1, userId, products: orderProducts };
+  orders.push(newOrder);
+  res.status(201).json(newOrder);
+});
+
+// Get all orders
+app.get('/api/orders', (req, res) => {
+  res.json(orders);
+});
+
+// Get product categories
+app.get('/api/categories', (req, res) => {
+  // Extract unique categories from products
+  const categories = [...new Set(products.map(product => product.category))];
+  res.json(categories);
+});
+
+// Search products based on keywords
+app.get('/api/search', (req, res) => {
+  const { keywords } = req.query;
+  const matchingProducts = products.filter(product => product.name.toLowerCase().includes(keywords.toLowerCase()));
+  res.json(matchingProducts);
+});
+
+// Start the server
+app.listen(port, () => {
+  console.log(`Server listening at http://localhost:${port}`);
+});
